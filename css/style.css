@@ -1,13 +1,38 @@
 html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 canvas {
   background: #333;
 }
 
+h1 {
+  text-align: center;
+}
+
 #score {
   position: absolute;
   color: #fff;
+}
+
+#pop-up-container {
+  height: 100%;
+  width: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+}
+
+#pop-up {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  padding: 75px;
+  border-radius: 5px;
+  font-family: sans-serif;
+  flex-flow: column wrap;
 }
