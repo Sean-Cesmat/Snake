@@ -1,17 +1,23 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 99%;
+  height: 100%;
   font-size: 14px;
+  overflow: hidden;
 }
 
 canvas {
   background: #333;
+  margin-bottom: 0px;
 }
 
 h1 {
   text-align: center;
   font-size: 3rem;
+}
+
+header .row {
+  margin-bottom: 0px;
 }
 
 #next-player, #reset, #winner {

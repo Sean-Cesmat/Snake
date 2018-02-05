@@ -1,8 +1,6 @@
 $(document).ready(function() {
   $('select').material_select();
-});
 
-document.addEventListener('DOMContentLoaded', function(event) {
   function cl(string) {
     console.log(string);
   }
@@ -52,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   // set up canvas width & height
   canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight - 100;
+  canvas.height = window.innerHeight - $('header').outerHeight();
 
   // This function will clear &/or create arrays for the food to randomly select a location
   var foodLocationChoices = function() {
@@ -77,23 +75,29 @@ document.addEventListener('DOMContentLoaded', function(event) {
   var food = {
     w: snakeSize,
     h: snakeSize,
-    //color: '#0392cf',
   }
   cl(snake.x + ' ' + snake.y)
   var randomColor = function() {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
+  var clearVars = function() {
+    score = 0;
+    xSnakeTail = [];
+    ySnakeTail = [];
+    colorSnakeTail = [];
+    direction = '';
+  }
+
   // This function is to use the directions to move the snake
   var moveSnake = function(event) {
     // UP
     if (event.keyCode === 38) {
-      if (direction !== 'down') {
+      if (direction !== 'down' && direction !== 'up') {
         clearInterval(downInterval);
         clearInterval(leftInterval);
         clearInterval(rightInterval);
         startUpInterval = function() {
-          clearInterval(upInterval);
           upInterval = setInterval(function() {
             snake.y -= snakeSize;
           }, gameInterval);
@@ -104,29 +108,26 @@ document.addEventListener('DOMContentLoaded', function(event) {
     };
     // Down
     if (event.keyCode === 40) {
-      if (direction !== 'up') {
+      if (direction !== 'up' && direction !== 'down') {
         clearInterval(upInterval);
         clearInterval(leftInterval);
         clearInterval(rightInterval);
         startDownInterval = function() {
-          clearInterval(downInterval);
           downInterval = setInterval(function() {
             snake.y += snakeSize;
           }, gameInterval);
         };
-
         startDownInterval();
         direction = 'down';
        }
     };
     // Left
     if (event.keyCode === 37) {
-      if (direction !== 'right') {
+      if (direction !== 'right' && direction !== 'left') {
         clearInterval(upInterval);
         clearInterval(downInterval);
         clearInterval(rightInterval);
         startLeftInterval = function() {
-          clearInterval(leftInterval);
           leftInterval = setInterval(function() {
             snake.x -= snakeSize;
           }, gameInterval);
@@ -137,12 +138,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
     };
     // Right
     if (event.keyCode === 39) {
-      if (direction !== 'left') {
+      if (direction !== 'left' && direction !== 'right') {
         clearInterval(upInterval);
         clearInterval(downInterval);
         clearInterval(leftInterval);
         startRightInterval = function() {
-          clearInterval(rightInterval);
           rightInterval = setInterval(function() {
             snake.x += snakeSize;
           }, gameInterval);
@@ -161,12 +161,16 @@ document.addEventListener('DOMContentLoaded', function(event) {
         popUpContainer.style.display = 'flex';
       } else if (gamePaused === true) {
         if (direction === 'up'){
+          clearInterval(upInterval);
           startUpInterval();
         } else if (direction === 'down') {
+          clearInterval(downInterval);
           startDownInterval();
         } else if (direction === 'left') {
+          clearInterval(leftInterval);
           startLeftInterval();
         } else if (direction === 'right') {
+          clearInterval(rightInterval);
           startRightInterval();
         }
         startDrawing();
@@ -184,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   // This function takes the options and updates the game with the new options
   var startGame = function() {
-    score = 0;
+    //--score = 0;
     snakeSize = $('#size-selector').find(':selected').val();
     snakeSize = Number(snakeSize);
     gameInterval = $('#speed-selector').find(':selected').val();
@@ -211,14 +215,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
     popUpContainer.style.display = 'none';
     // Add an event listener for keydown calling function moveSnake
     window.addEventListener('keydown', moveSnake);
+
   };
 
   var nextPlayer = function() {
-    score = 0;
-    xSnakeTail = [];
-    ySnakeTail = [];
-    colorSnakeTail = [];
-    direction = '';
+    clearVars();
     setTimeout(function() {
       popUpContainer.style.display = 'none';
       popUpScore.style.display = 'none';
@@ -307,14 +308,9 @@ document.addEventListener('DOMContentLoaded', function(event) {
     ctx.fillStyle = food.color;
     ctx.fillRect(food.x, food.y, food.w, food.h);
 
-
-    // document.getElementById('score').textContent = String(score);
-
     // Pass the x, y values of the head to an array for the tail to use
     xSnakeTail.unshift(snake.x);
     ySnakeTail.unshift(snake.y);
-
-    //cl('x: ' + xSnakeTail.length + ' | y: ' + ySnakeTail);
 
     // check to see if the snake has any x,y values for its tail, if so add the squares
     for (var i = 1; i <= score; i++) {
@@ -334,7 +330,6 @@ document.addEventListener('DOMContentLoaded', function(event) {
       ySnakeTail.pop();
     }
 
-
     // Check to see if the head of the snake has hit its own  tail, if so end the game
     var hitSelfCheck = function(x1, y1, x2, y2) {
       var xDistance = (x2 + snakeSize) - (x1 + snakeSize);
@@ -347,8 +342,9 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
     // Check to See if the snake hits the food
     foodGotAte(snake.x, snake.y, food.x, food.y);
+
     if (xSnakeTail.length > 2) {
-      for (var i = 2; i <= xSnakeTail.length; i++) {
+      for (var i = 3; i <= xSnakeTail.length; i++) {
         if (xSnakeTail[i] === xSnakeTail[0] && ySnakeTail[i] === ySnakeTail[0]) {
           hitSelfCheck(snake.x, snake.y, xSnakeTail[i], ySnakeTail[i]);
           console.log('Game Over! Hit Slef');
@@ -378,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     clearInterval(frameLoopInterval);
   };
 
-  var newGame = function() {
+  var newGameOptions = function() {
     popUpContainer.style.display = 'flex';
     popUpNewGame.style.display = 'flex';
     newFood();
@@ -387,35 +383,26 @@ document.addEventListener('DOMContentLoaded', function(event) {
   var startDrawing = function() {
     frameLoopInterval = setInterval(animationLoop, gameInterval);
   };
-  newGame();
-
-
+  newGameOptions();
 
   var resetGame = function() {
-    score = 0;
+    clearVars();
     player1Score = 0;
     player2Score = 0;
     updateScoreBoard();
-    xSnakeTail = [];
-    ySnakeTail = [];
-    colorSnakeTail = [];
-    //colorSnakeTail.push(food.color);
     setTimeout(function() {
       popUpContainer.style.display = 'none';
       popUpScore.style.display = 'none';
       finalScoreText.html('');
-      newGame();
+      newGameOptions();
     }, 500);
     snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
     snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
     clearAllIntervals();
-    direction = '';
-    //startDrawing();
-    //newGame();
   };
 
     updateOptionsBtn.addEventListener('click', startGame, true);
     resetButton.addEventListener('click', resetGame);
     nextPlayerButton.addEventListener('click', nextPlayer);
 
-}); /// END DOM LOAD
+}); /// END $(document).ready(function()
