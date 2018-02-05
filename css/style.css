@@ -14,6 +14,10 @@ h1 {
   font-size: 3rem;
 }
 
+#next-player, #reset, #winner {
+  display: none;
+}
+
 
 #score {
   position: absolute;
@@ -30,7 +34,11 @@ h1 {
   position: absolute;
 }
 
-#pop-up {
+#pop-up-score, #pop-up-paused {
+  display: none;
+}
+
+.pop-up {
   display: flex;
   justify-content: center;
   align-items: center;

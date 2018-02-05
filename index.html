@@ -12,32 +12,81 @@
   </head>
   <body>
     <div id="pop-up-container">
-      <div id="pop-up">
-        <h1>Final Score: <br /><span id="final-score-text"></span></h1>
-        <h1>Your High Score: <br /><span id="high-score-text"></span></h1>
-        <a id="reset" class="waves-effect waves-light btn"><i class="material-icons right">rotate_left</i>Replay</a>
+      <div id="pop-up-new-game" class="pop-up">
+        <label for="player1">Player 1 Name: <input type="text" id="player1" /></label><br />
+        <label for="player2">Player 2 Name: <input type="text" id="player2" /></label>
+
+        <div class="container">
+          <div class="row">
+            <div class="input-field col s6 center-align">
+              <select  id="size-selector">
+                <option value="10">Small</option>
+                <option value="15" selected>Normal</option>
+                <option value="20">Large</option>
+              </select>
+              <label>Size of snake:</label>
+            </div>
+            <div class="input-field col s6 center-align">
+              <select id="speed-selector">
+                <option value="200">Slow</option>
+                <option value="100" selected>Normal</option>
+                <option value="75">Fast</option>
+              </select>
+              <label>Speed:</label>
+            </div>
+
+          </div>
+        </div>
+        <a id="options-update" class="waves-effect waves-light btn">GO!</a>
+        <!-- <a id="apply-names" class="waves-effect waves-light btn">Start Game</a> -->
+      </div>
+      <div id="pop-up-paused" class="pop-up">
+        <h1>Paused</h1>
+        <h5>Press SpaceBar to Continute.</h5>
+      </div>
+      <div id="pop-up-score" class="pop-up">
+        <h1 id="final-score-text"></h1>
+        <h1 id="winner"></h1>
+        <a id="next-player" class="waves-effect waves-light btn">Next Player</a>
+        <a id="reset" class="waves-effect waves-light btn"><i class="material-icons right">rotate_left</i>New Game</a>
       </div>
     </div>
-    <div class="container">
+    <header>
+      <div class="container">
+        <div class="row">
+          <div class="col s6 center-align">
+            <h5 id="player1-score"></h5>
+          </div>
+          <div class="col s6 center-align">
+            <h5 id="player2-score"></h5>
+          </div>
+        </div>
+      </div>
+    </header>
+    <!-- <header class="container">
       <div class='row'>
-        <div class="input-field col s4">
-          <select>
-            <option value="" disabled selected>Choose your option</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
+        <div class="input-field col s4 center-align">
+          <select  id="size-selector">
+            <option value="10">Small</option>
+            <option value="15" selected>Normal</option>
+            <option value="20">Large</option>
           </select>
           <label>Size of snake:</label>
         </div>
-        <div class="col s4">
+        <div class="col s4 center-align">
           <a id="options-update" class="waves-effect waves-light btn">GO!</a>
           <h1 id="score"></h1>
         </div>
-        <div class="col s4">
-
+        <div class="input-field col s4">
+          <select id="speed-selector">
+            <option value="200">Slow</option>
+            <option value="100" selected>Normal</option>
+            <option value="75">Fast</option>
+          </select>
+          <label>Speed:</label>
         </div>
       </div>
-    </div>
+    </header> -->
     <canvas id="game-canvas"></canvas>
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
