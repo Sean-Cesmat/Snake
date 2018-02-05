@@ -1,3 +1,7 @@
+$(document).ready(function() {
+  $('select').material_select();
+});
+
 document.addEventListener('DOMContentLoaded', function(event) {
   function cl(string) {
     console.log(string);
@@ -10,14 +14,15 @@ document.addEventListener('DOMContentLoaded', function(event) {
   var finalScoreText = document.getElementById('final-score-text');
   var highScoreText = document.getElementById('high-score-text');
   var resetButton = document.getElementById('reset');
+  var updateOptionsBtn = document.getElementById('options-update');
   var frameLoopInterval;
   var gameInterval = 100;
-  var snakeSize = 20;
+  var snakeSize = 10;
   var score = 0;
   var xSnakeTail = [];
   var ySnakeTail = [];
   var colorSnakeTail = [];
-  var colors = ['#ee4035', '#f37736', '#fdf498', '#7bc043', '#0392cf', '#7d32cc', '#c24cd3', '#7d32cc', '#c24cd3']
+  var colors = ['#ee4035', '#f37736', '#fdf498', '#7bc043', '#0392cf', '#7d32cc', '#c24cd3']
   var upInterval;
   var downInterval;
   var leftInterval;
@@ -28,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   // set up canvas width & height
   canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.height = window.innerHeight - 100;
 
   for (var i = 0; i < (canvas.width - snakeSize); i += snakeSize) {
     widthBySnakeSize.push(i);
@@ -118,15 +123,44 @@ document.addEventListener('DOMContentLoaded', function(event) {
     };
   };
 
+  var updateGameBoardOptions = function() {
+    snakeSize = $('select').find(":selected").val();
+    snakeSize = Number(snakeSize);
+    colorSnakeTail = [];
+    snake.w = snakeSize;
+    snake.h = snakeSize;
+    food.w = snakeSize;
+    food.h = snakeSize;
+    widthBySnakeSize = [];
+    heightBySnakeSize = [];
+    for (var i = 0; i < (canvas.width - snakeSize); i += snakeSize) {
+      widthBySnakeSize.push(i);
+    }
+    for (var i = 0; i < (canvas.height - snakeSize); i += snakeSize) {
+      heightBySnakeSize.push(i);
+    }
+    snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
+    snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
+    cl(snakeSize);
+    clearInterval(frameLoopInterval);
+    startDrawing();
+  };
+
   // Create a new food square
   var newFood = function() {
     // food.x = Math.random() * (window.innerWidth - snakeSize);
     // food.y = Math.random() * (window.innerHeight - snakeSize);
     food.color = randomColor();
     colorSnakeTail.push(food.color);
-    cl(colorSnakeTail);
+    //cl(colorSnakeTail);
     food.x = widthBySnakeSize[Math.floor(Math.random() * widthBySnakeSize.length)];
     food.y = heightBySnakeSize[Math.floor(Math.random() * heightBySnakeSize.length)];
+    for (var i = 0; i <= score; i++ ) {
+      if (xSnakeTail[i] === food.x && ySnakeTail[i] === food.y) {
+        newFood();
+        cl('woops food cannot go on the snake');
+      }
+    }
     console.log('x ' + food.x + '  y ' + food.y);
   };
 
@@ -135,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     var xDistance = (x2 + snakeSize) - (x1 + snakeSize);
     var yDistance = (y2 + snakeSize) - (y1 + snakeSize);
     var gotAte = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-    cl(gotAte);
+    //cl(gotAte);
     if (gotAte <= (snakeSize - 2)) {
       score += 1;
       newFood();
@@ -144,11 +178,13 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   // if any conditional ends the game it calls this function
   var gameOver = function() {
-    cl(finalScoreText)
+    //cl(finalScoreText)
     popUpContainer.style.display = 'flex';
     finalScoreText.textContent = score;
     clearInterval(frameLoopInterval);
   };
+
+
 
   // This is the main Interval section for drawing on the canvas
   var animationLoop = function() {
@@ -169,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     xSnakeTail.unshift(snake.x);
     ySnakeTail.unshift(snake.y);
 
-    cl('x: ' + xSnakeTail.length + ' | y: ' + ySnakeTail);
+    //cl('x: ' + xSnakeTail.length + ' | y: ' + ySnakeTail);
 
     // check to see if the snake has any x,y values for its tail, if so add the squares
     for (var i = 1; i <= score; i++) {
@@ -192,6 +228,17 @@ document.addEventListener('DOMContentLoaded', function(event) {
       ySnakeTail.pop();
     }
 
+
+    // Check to see if the head of the snake has hit its own  tail, if so end the game
+    var hitSelfCheck = function(x1, y1, x2, y2) {
+      var xDistance = (x2 + snakeSize) - (x1 + snakeSize);
+      var yDistance = (y2 + snakeSize) - (y1 + snakeSize);
+      var selfCheck = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
+      if (selfCheck <= 1) {
+        gameOver();
+      }
+    };
+
     // Check to See if the snake hits the food
     foodGotAte(snake.x, snake.y, food.x, food.y);
     if (xSnakeTail.length > 2) {
@@ -204,17 +251,6 @@ document.addEventListener('DOMContentLoaded', function(event) {
       };
     };
 
-    // Check to see if the head of the snake has hit its own  tail, if so end the game
-    var hitSelfCheck = function(x1, y1, x2, y2) {
-      var xDistance = (x2 + snakeSize) - (x1 + snakeSize);
-      var yDistance = (y2 + snakeSize) - (y1 + snakeSize);
-      var selfCheck = Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2));
-      cl(selfCheck);
-      if (selfCheck <= 1) {
-        gameOver();
-      }
-    };
-    
     // If the Game hits the border, game over.
     if (snake.x + snake.w > canvas.width) {
       gameOver();
@@ -256,6 +292,9 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
   // Add an event listener for keydown calling function moveSnake
     window.addEventListener('keydown', moveSnake);
+    updateOptionsBtn.addEventListener('click', updateGameBoardOptions, true);
     resetButton.addEventListener('click', resetGame);
+
+
 
 }); /// END DOM LOAD
