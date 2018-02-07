@@ -40,7 +40,7 @@ header .row {
   position: absolute;
 }
 
-#pop-up-score, #pop-up-paused {
+#pop-up-score, #pop-up-paused, #pop-up-level {
   display: none;
 }
 

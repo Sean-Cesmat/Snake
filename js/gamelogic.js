@@ -11,11 +11,13 @@ $(document).ready(function() {
   var popUpContainer = document.getElementById('pop-up-container');
   var popUpPaused = document.getElementById('pop-up-paused');
   var popUpScore = document.getElementById('pop-up-score');
-  var popUpNewGame = document.getElementById('pop-up-new-game')
+  var popUpNewGame = document.getElementById('pop-up-new-game');
+  var popUpLevel = $('#pop-up-level');
   var finalScoreText = $('#final-score-text');
   var highScoreText = document.getElementById('high-score-text');
   var resetButton = document.getElementById('reset');
   var nextPlayerButton = document.getElementById('next-player');
+  var nextLevelButton = document.getElementById('next-level');
   var updateOptionsBtn = document.getElementById('options-update');
   var player1Input = $('#player1');
   var player2Input = $('#player2');
@@ -47,6 +49,9 @@ $(document).ready(function() {
   var player1Score = 0;
   var player2Score = 0;
   var currentPlayer = 1;
+  var level = 1;
+  var halfWidthBySnakeSize;
+  var halfheightBySnakeSize;
 
   // set up canvas width & height
   canvas.width = window.innerWidth;
@@ -87,6 +92,7 @@ $(document).ready(function() {
     ySnakeTail = [];
     colorSnakeTail = [];
     direction = '';
+    level = 1;
   }
 
   // This function is to use the directions to move the snake
@@ -193,11 +199,9 @@ $(document).ready(function() {
     snakeSize = Number(snakeSize);
     gameInterval = $('#speed-selector').find(':selected').val();
     gameInterval = Number(gameInterval);
-    cl('interval ' + gameInterval);
     player1Name = player1Input.val();
     player2Name = player2Input.val();
     updateScoreBoard();
-    //Clear the colors array
     colorSnakeTail = [];
     colorSnakeTail.push(food.color);
     snake.w = snakeSize;
@@ -208,6 +212,8 @@ $(document).ready(function() {
     foodLocationChoices();
     snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
     snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
+    food.x = widthBySnakeSize[Math.floor(Math.random() * widthBySnakeSize.length)];
+    food.y = heightBySnakeSize[Math.floor(Math.random() * heightBySnakeSize.length)];
     clearAllIntervals();
     direction = '';
     startDrawing();
@@ -261,6 +267,7 @@ $(document).ready(function() {
       }
       updateScoreBoard();
       newFood();
+
     }
   };
 
@@ -294,19 +301,154 @@ $(document).ready(function() {
     clearAllIntervals();
   };
 
+  var levelComplete = function() {
+    window.removeEventListener('keydown', moveSnake);
+    xSnakeTail = [];
+    ySnakeTail = [];
+    direction = 'up';
+    popUpContainer.style.display = 'flex';
+    popUpLevel.css('display', 'flex');
+    $('#pop-up-level h1').html('Level ' + level + ' complete');
+    snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
+    snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
+    clearAllIntervals();
+    level++;
+  };
 
+  var nextLevel = function() {
+    popUpContainer.style.display = 'none';
+    popUpLevel.css('display', 'none');
+    startUpInterval();
+    startDrawing();
+    window.addEventListener('keydown', moveSnake);
+  };
+
+  // These functions create barriers, make it so food won't be added there
+  // and they also check to see if the snake touched it
+  var drawingVerticalWall = function(x, y, y2, length) {
+    ctx.fillStyle = '#26a69a';
+    ctx.fillRect(x, y, snakeSize, snakeSize * length);
+    if (snake.x >= x && snake.x <= (x + snakeSize - 1)) {
+      if (snake.y >= y && snake.y <= (y2 - 1) ) {
+        gameOver();
+      }
+    };
+  };
+  var verticalWallCheck = function(itemX, itemY, x, y, y2, length) {
+    if (itemX >= x && itemX <= (x + snakeSize - 1)) {
+      if (itemY >= y && itemY <= (y2 - 1) ) {
+        // if (itemX === snake.x) {
+        //   gameOver();
+        //   cl('snakes cannot go on a wall');
+        // };
+        if (itemX === food.x) {
+          newFood();
+          cl('food cannot go on a wall');
+        };
+      };
+    };
+  };
+  var drawingHorizontalWall = function(x, x2, y, length) {
+    ctx.fillStyle = '#26a69a';
+    ctx.fillRect(x, y, snakeSize * length, snakeSize);
+    if (snake.x >= x && snake.x <= (x2 - 1)) {
+      if (snake.y >= y && snake.y <= (y + snakeSize) - 1) {
+        gameOver();
+      }
+    };
+  };
+  var horizontalWallCheck = function(itemX, itemY, x, x2, y, length) {
+    if (itemX >= x && itemX <= (x2 - 1)) {
+      if (itemY >= y && itemY <= (y + snakeSize - 1)) {
+        // if (itemX === snake.x) {
+        //   gameOver();
+        //   cl('snakes cannot go on a wall');
+        // };
+        if (itemX === food.x) {
+          newFood();
+          cl('food cannot go on a wall');
+        };
+      };
+    };
+  };
+
+  // Get half of the array and make sure its a whole number
+  halfWidthBySnakeSize = Math.floor(widthBySnakeSize.length / 2);
+  halfHeightBySnakeSize = Math.floor(heightBySnakeSize.length / 2);
 
   // This is the main Interval section for drawing on the canvas
   var animationLoop = function() {
     // Clear the frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    cl(colorSnakeTail);
+
     //Creating the snake head
     ctx.fillStyle = snake.color;
     ctx.fillRect(snake.x, snake.y, snake.w, snake.h);
     //Creating the food
     ctx.fillStyle = food.color;
     ctx.fillRect(food.x, food.y, food.w, food.h);
+
+    if (score === 5 && level === 1) {
+      levelComplete();
+    } else if (score === 10 && level === 2){
+      levelComplete();
+    } else if (score === 20 && level === 3){
+      levelComplete();
+    }
+
+    if (score >= 5 && level >= 2) {
+      // LeftCenter Wall
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize - 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
+      // RightCenter Wall
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize + 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
+    }
+
+    if (score >= 10 && level >= 3) {
+
+      // UpperLeft -- create item and make sure no food goes there
+      drawingVerticalWall(widthBySnakeSize[5], heightBySnakeSize[5],  heightBySnakeSize[9], 4);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[5], heightBySnakeSize[5],  heightBySnakeSize[9], 4);
+      drawingHorizontalWall(widthBySnakeSize[5], widthBySnakeSize[9], heightBySnakeSize[5], 4);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[5], widthBySnakeSize[9], heightBySnakeSize[5], 4);
+
+      // UpperRight -- create item and make sure no food goes there
+      drawingVerticalWall(widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[5],  heightBySnakeSize[9], 4);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[5],  heightBySnakeSize[9], 4);
+      drawingHorizontalWall(widthBySnakeSize[widthBySnakeSize.length - 8], widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[5], 4);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[widthBySnakeSize.length - 8], widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[5], 4);
+
+      // LowerLeft
+      drawingVerticalWall(widthBySnakeSize[5], heightBySnakeSize[heightBySnakeSize.length - 8],  heightBySnakeSize[heightBySnakeSize.length - 5], 4);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[5], heightBySnakeSize[heightBySnakeSize.length - 8],  heightBySnakeSize[heightBySnakeSize.length - 5], 4);
+      drawingHorizontalWall(widthBySnakeSize[5], widthBySnakeSize[9], heightBySnakeSize[heightBySnakeSize.length - 5], 4);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[5], widthBySnakeSize[9], heightBySnakeSize[heightBySnakeSize.length - 5], 4);
+
+      drawingVerticalWall(widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[heightBySnakeSize.length - 8],  heightBySnakeSize[heightBySnakeSize.length - 5], 4);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[heightBySnakeSize.length - 8],  heightBySnakeSize[heightBySnakeSize.length - 5], 4);
+      drawingHorizontalWall(widthBySnakeSize[widthBySnakeSize.length - 8], widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[heightBySnakeSize.length - 5], 4);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[widthBySnakeSize.length - 8], widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[heightBySnakeSize.length - 5], 4);
+    }
+
+    if (score >= 20 && level >= 4) {
+      if (canvas.width > 860) {
+        // MiddleLeft
+        drawingHorizontalWall(widthBySnakeSize[8], widthBySnakeSize[15], heightBySnakeSize[halfHeightBySnakeSize], 7);
+        horizontalWallCheck(food.x, food.y, widthBySnakeSize[8], widthBySnakeSize[15], heightBySnakeSize[halfHeightBySnakeSize], 7);
+        // Middle RIght
+        drawingHorizontalWall(widthBySnakeSize[widthBySnakeSize.length - 15], widthBySnakeSize[widthBySnakeSize.length - 8], heightBySnakeSize[halfHeightBySnakeSize], 7);
+        horizontalWallCheck(food.x, food.y, widthBySnakeSize[widthBySnakeSize.length - 14], widthBySnakeSize[widthBySnakeSize.length - 21], heightBySnakeSize[halfHeightBySnakeSize], 7);
+      }
+      if (canvas.width > 1000) {
+        // Inner MiddleLeft
+        drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize - 13], widthBySnakeSize[halfHeightBySnakeSize - 17], heightBySnakeSize[halfHeightBySnakeSize], 4);
+        horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 13], widthBySnakeSize[halfHeightBySnakeSize - 17], heightBySnakeSize[halfHeightBySnakeSize], 4);
+        // Inner Middle RIght
+        drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize + 11], widthBySnakeSize[halfWidthBySnakeSize + 15], heightBySnakeSize[halfHeightBySnakeSize], 4);
+        horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 11], widthBySnakeSize[halfWidthBySnakeSize + 15], heightBySnakeSize[halfHeightBySnakeSize], 4);
+      }
+    }
 
     // Pass the x, y values of the head to an array for the tail to use
     xSnakeTail.unshift(snake.x);
@@ -404,5 +546,6 @@ $(document).ready(function() {
     updateOptionsBtn.addEventListener('click', startGame, true);
     resetButton.addEventListener('click', resetGame);
     nextPlayerButton.addEventListener('click', nextPlayer);
+    nextLevelButton.addEventListener('click', nextLevel);
 
 }); /// END $(document).ready(function()
