@@ -8,21 +8,23 @@ $(document).ready(function() {
   // Grab Canvas element and store it
   var canvas = document.getElementById('game-canvas');
   var ctx = canvas.getContext('2d');
-  var popUpContainer = document.getElementById('pop-up-container');
-  var popUpPaused = document.getElementById('pop-up-paused');
-  var popUpScore = document.getElementById('pop-up-score');
-  var popUpNewGame = document.getElementById('pop-up-new-game');
+  var popUpPaused = $('#pop-up-paused');
+  var popUpScore = $('#pop-up-score');
+  var popUpNewGame = $('#pop-up-new-game');
   var popUpLevel = $('#pop-up-level');
   var finalScoreText = $('#final-score-text');
-  var highScoreText = document.getElementById('high-score-text');
-  var resetButton = document.getElementById('reset');
-  var nextPlayerButton = document.getElementById('next-player');
-  var nextLevelButton = document.getElementById('next-level');
-  var updateOptionsBtn = document.getElementById('options-update');
+  var highScoreText = $('#high-score-text');
+  var resetButton = $('#reset');
+  var nextPlayerButton = $('#next-player');
+  var nextLevelButton = $('#next-level');
+  var updateOptionsBtn = $('#options-update');
+  var brickImg = new Image();
+  brickImg.src = 'img/gray-brick-sm.jpg';
   var player1Input = $('#player1');
   var player2Input = $('#player2');
   var player1ScoreBoard = $('#player1-score');
   var player2ScoreBoard = $('#player2-score');
+  var oneItteration = true;
   var frameLoopInterval;
   var gameInterval = 100;
   var snakeSize = 15;
@@ -54,11 +56,13 @@ $(document).ready(function() {
   var halfWidthBySnakeSize;
   var halfheightBySnakeSize;
 
-  // set up canvas width & height
+  // Initial set up canvas width & height
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight - $('header').outerHeight();
 
-  // This function will clear &/or create arrays for the food to randomly select a location
+
+  //  This function essentially sets up arrays for grid use
+  // It will clear &/or create arrays for the food to randomly select a location
   var foodLocationChoices = function() {
     widthBySnakeSize = [];
     heightBySnakeSize = [];
@@ -70,6 +74,10 @@ $(document).ready(function() {
     }
   }
   foodLocationChoices();
+
+  // Get half of the array and make sure its a whole number
+  halfWidthBySnakeSize = Math.floor(widthBySnakeSize.length / 2);
+  halfHeightBySnakeSize = Math.floor(heightBySnakeSize.length / 2);
 
   var snake = {
     x: widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)],
@@ -100,60 +108,68 @@ $(document).ready(function() {
   var moveSnake = function(event) {
     // UP
     if (event.keyCode === 38) {
-      if (direction !== 'down' && direction !== 'up') {
+      if (direction !== 'down' && direction !== 'up' && oneItteration === true) {
         clearInterval(downInterval);
         clearInterval(leftInterval);
         clearInterval(rightInterval);
         startUpInterval = function() {
           upInterval = setInterval(function() {
             snake.y -= snakeSize;
+            oneItteration = true;
           }, gameInterval);
         }
+        oneItteration = false;
         startUpInterval();
         direction = 'up';
        }
     };
     // Down
     if (event.keyCode === 40) {
-      if (direction !== 'up' && direction !== 'down') {
+      if (direction !== 'up' && direction !== 'down' && oneItteration === true) {
         clearInterval(upInterval);
         clearInterval(leftInterval);
         clearInterval(rightInterval);
         startDownInterval = function() {
           downInterval = setInterval(function() {
             snake.y += snakeSize;
+            oneItteration = true;
           }, gameInterval);
         };
+        oneItteration = false;
         startDownInterval();
         direction = 'down';
        }
     };
     // Left
     if (event.keyCode === 37) {
-      if (direction !== 'right' && direction !== 'left') {
+      if (direction !== 'right' && direction !== 'left' && oneItteration === true) {
         clearInterval(upInterval);
         clearInterval(downInterval);
         clearInterval(rightInterval);
         startLeftInterval = function() {
           leftInterval = setInterval(function() {
             snake.x -= snakeSize;
+            oneItteration = true;
           }, gameInterval);
         }
+        oneItteration = false;
         startLeftInterval();
         direction = 'left';
       }
     };
     // Right
     if (event.keyCode === 39) {
-      if (direction !== 'left' && direction !== 'right') {
+      if (direction !== 'left' && direction !== 'right' && oneItteration === true) {
         clearInterval(upInterval);
         clearInterval(downInterval);
         clearInterval(leftInterval);
         startRightInterval = function() {
           rightInterval = setInterval(function() {
             snake.x += snakeSize;
+            oneItteration = true;
           }, gameInterval);
         }
+        oneItteration = false;
         startRightInterval();
         direction = 'right';
       }
@@ -164,8 +180,8 @@ $(document).ready(function() {
         //clearInterval(frameLoopInterval);
         clearAllIntervals();
         gamePaused = true;
-        popUpPaused.style.display = 'flex';
-        popUpContainer.style.display = 'flex';
+        popUpPaused.css('display', 'flex');
+        $('#main-modal').modal('open');
       } else if (gamePaused === true) {
         if (direction === 'up'){
           clearInterval(upInterval);
@@ -182,8 +198,8 @@ $(document).ready(function() {
         }
         startDrawing();
         gamePaused = false;
-        popUpContainer.style.display = 'none';
-        popUpPaused.style.display = 'none';
+        popUpPaused.css('display', 'none');
+        $('#main-modal').modal('close');
       }
     }
   };
@@ -196,6 +212,7 @@ $(document).ready(function() {
   // This function takes the options and updates the game with the new options
   var startGame = function() {
     //--score = 0;
+    newFood();
     snakeSize = $('#size-selector').find(':selected').val();
     snakeSize = Number(snakeSize);
     gameInterval = $('#speed-selector').find(':selected').val();
@@ -218,8 +235,6 @@ $(document).ready(function() {
     clearAllIntervals();
     direction = '';
     startDrawing();
-    popUpNewGame.style.display = 'none';
-    popUpContainer.style.display = 'none';
     // Add an event listener for keydown calling function moveSnake
     window.addEventListener('keydown', moveSnake);
 
@@ -228,9 +243,8 @@ $(document).ready(function() {
   var nextPlayer = function() {
     clearVars();
     setTimeout(function() {
-      popUpContainer.style.display = 'none';
-      popUpScore.style.display = 'none';
-      finalScoreText.html('');
+      $('#main-modal').modal('close');
+      popUpScore.css('display', 'none');
     }, 500);
     snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
     snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
@@ -275,8 +289,8 @@ $(document).ready(function() {
   // if any conditional ends the game it calls this function
   var gameOver = function() {
     //cl(finalScoreText)
-    popUpScore.style.display = 'flex';
-    popUpContainer.style.display = 'flex';
+    popUpScore.css('display', 'flex');
+    $('#main-modal').modal('open');
     finalScoreText.html(score);
     if (currentPlayer === 1) {
       finalScoreText.html(player1Name + ': ' + player1Score);
@@ -307,7 +321,7 @@ $(document).ready(function() {
     xSnakeTail = [];
     ySnakeTail = [];
     direction = 'up';
-    popUpContainer.style.display = 'flex';
+    $('#main-modal').modal('open');
     popUpLevel.css('display', 'flex');
     $('#pop-up-level h1').html('Level ' + level + ' complete');
     snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
@@ -325,8 +339,8 @@ $(document).ready(function() {
 
   var nextLevel = function() {
     window.removeEventListener('keydown', upForNextLevel);
-    popUpContainer.style.display = 'none';
     popUpLevel.css('display', 'none');
+    $('#main-modal').modal('close');
     startUpInterval();
     startDrawing();
     window.addEventListener('keydown', moveSnake);
@@ -335,7 +349,10 @@ $(document).ready(function() {
   // These functions create barriers, make it so food won't be added there
   // and they also check to see if the snake touched it
   var drawingVerticalWall = function(x, y, y2, length) {
-    ctx.fillStyle = '#26a69a';
+    //ctx.fillStyle = '#26a69a';
+    var pattern = ctx.createPattern(brickImg, 'repeat');
+    ctx.fillStyle = pattern;
+    //ctx.fillRect(0, 0, snakeSize, snakeSize);
     ctx.fillRect(x, y, snakeSize, snakeSize * length);
     if (snake.x >= x && snake.x <= (x + snakeSize - 1)) {
       if (snake.y >= y && snake.y <= (y2 - 1) ) {
@@ -358,7 +375,9 @@ $(document).ready(function() {
     };
   };
   var drawingHorizontalWall = function(x, x2, y, length) {
-    ctx.fillStyle = '#26a69a';
+    // ctx.fillStyle = '#26a69a';
+    var pattern = ctx.createPattern(brickImg, 'repeat');
+    ctx.fillStyle = pattern;
     ctx.fillRect(x, y, snakeSize * length, snakeSize);
     if (snake.x >= x && snake.x <= (x2 - 1)) {
       if (snake.y >= y && snake.y <= (y + snakeSize) - 1) {
@@ -381,21 +400,11 @@ $(document).ready(function() {
     };
   };
 
-  // Get half of the array and make sure its a whole number
-  halfWidthBySnakeSize = Math.floor(widthBySnakeSize.length / 2);
-  halfHeightBySnakeSize = Math.floor(heightBySnakeSize.length / 2);
-
   // This is the main Interval section for drawing on the canvas
   var animationLoop = function() {
     // Clear the frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    //Creating the snake head
-    ctx.fillStyle = snake.color;
-    ctx.fillRect(snake.x, snake.y, snake.w, snake.h);
-    //Creating the food
-    ctx.fillStyle = food.color;
-    ctx.fillRect(food.x, food.y, food.w, food.h);
 
     if (score === 5 && level === 1) {
       levelComplete();
@@ -403,16 +412,23 @@ $(document).ready(function() {
       levelComplete();
     } else if (score === 20 && level === 3){
       levelComplete();
+    } else {
+      //Creating the snake head
+      ctx.fillStyle = snake.color;
+      ctx.fillRect(snake.x, snake.y, snake.w, snake.h);
+      //Creating the food
+      ctx.fillStyle = food.color;
+      ctx.fillRect(food.x, food.y, food.w, food.h);
     }
 
-    if (score >= 5 && level >= 2) {
+    // if (score >= 5 && level >= 2) {
       // LeftCenter Wall
       drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize - 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
       verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
       // RightCenter Wall
       drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize + 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
       verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
-    }
+    // }
 
     if (score >= 10 && level >= 3) {
 
@@ -525,16 +541,10 @@ $(document).ready(function() {
     clearInterval(frameLoopInterval);
   };
 
-  var newGameOptions = function() {
-    popUpContainer.style.display = 'flex';
-    popUpNewGame.style.display = 'flex';
-    newFood();
-  };
 
   var startDrawing = function() {
     frameLoopInterval = setInterval(animationLoop, gameInterval);
   };
-  newGameOptions();
 
   var resetGame = function() {
     clearVars();
@@ -542,19 +552,38 @@ $(document).ready(function() {
     player2Score = 0;
     updateScoreBoard();
     setTimeout(function() {
-      popUpContainer.style.display = 'none';
-      popUpScore.style.display = 'none';
-      finalScoreText.html('');
-      newGameOptions();
+      $('#main-modal').modal('close');
+      popUpScore.css('display', 'none');
+      $('#game-options').modal('open');
     }, 500);
     snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
     snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
     clearAllIntervals();
   };
 
-    updateOptionsBtn.addEventListener('click', startGame, true);
-    resetButton.addEventListener('click', resetGame);
-    nextPlayerButton.addEventListener('click', nextPlayer);
-    nextLevelButton.addEventListener('click', nextLevel);
+    updateOptionsBtn.on('click', startGame);
+    resetButton.on('click', resetGame);
+    nextPlayerButton.on('click', nextPlayer);
+    nextLevelButton.on('click', nextLevel);
+
+    $('#game-options').modal({
+      dismissible: false, // Modal can be dismissed by clicking outside of the modal
+      opacity: .5, // Opacity of modal background
+      inDuration: 300, // Transition in duration
+      outDuration: 200, // Transition out duration
+      startingTop: '4%', // Starting top style attribute
+      endingTop: '20%', // Ending top style attribute
+      complete: startGame // Callback for Modal close
+    });
+    $('#main-modal').modal({
+      dismissible: false, // Modal can be dismissed by clicking outside of the modal
+      opacity: .5, // Opacity of modal background
+      inDuration: 300, // Transition in duration
+      outDuration: 200, // Transition out duration
+      startingTop: '4%', // Starting top style attribute
+      endingTop: '20%', // Ending top style attribute
+      //complete:  // Callback for Modal close
+    });
+    $('#game-options').modal('open');
 
 }); /// END $(document).ready(function()
