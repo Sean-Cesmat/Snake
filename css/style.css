@@ -54,3 +54,12 @@ header .row {
   font-family: sans-serif;
   flex-flow: column wrap;
 }
+
+#pop-up-level {
+  margin: 10px 0px;
+}
+
+#pop-up-level p {
+  margin-top: -6px;
+  font-size: 1.3rem;
+}

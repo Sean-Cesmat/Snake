@@ -36,6 +36,7 @@ $(document).ready(function() {
   var leftInterval;
   var rightInterval;
   var direction;
+  var upForNextLevel;
   var widthBySnakeSize = [];
   var heightBySnakeSize = [];
   var clearAllIntervals;
@@ -313,9 +314,17 @@ $(document).ready(function() {
     snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
     clearAllIntervals();
     level++;
+    upForNextLevel = function(event) {
+      if (event.keyCode === 38) {
+        nextLevel();
+      }
+    }
+    window.addEventListener('keydown', upForNextLevel);
+
   };
 
   var nextLevel = function() {
+    window.removeEventListener('keydown', upForNextLevel);
     popUpContainer.style.display = 'none';
     popUpLevel.css('display', 'none');
     startUpInterval();
@@ -442,8 +451,8 @@ $(document).ready(function() {
       }
       if (canvas.width > 1000) {
         // Inner MiddleLeft
-        drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize - 13], widthBySnakeSize[halfHeightBySnakeSize - 17], heightBySnakeSize[halfHeightBySnakeSize], 4);
-        horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 13], widthBySnakeSize[halfHeightBySnakeSize - 17], heightBySnakeSize[halfHeightBySnakeSize], 4);
+        drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize - 15], widthBySnakeSize[halfWidthBySnakeSize - 11], heightBySnakeSize[halfHeightBySnakeSize], 4);
+        horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 15], widthBySnakeSize[halfWidthBySnakeSize - 11], heightBySnakeSize[halfHeightBySnakeSize], 4);
         // Inner Middle RIght
         drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize + 11], widthBySnakeSize[halfWidthBySnakeSize + 15], heightBySnakeSize[halfHeightBySnakeSize], 4);
         horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 11], widthBySnakeSize[halfWidthBySnakeSize + 15], heightBySnakeSize[halfHeightBySnakeSize], 4);
