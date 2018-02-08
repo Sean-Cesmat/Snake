@@ -1,10 +1,7 @@
 $(document).ready(function() {
-  $('select').material_select();
-
   function cl(string) {
     console.log(string);
   }
-
   // Grab Canvas element and store it
   var canvas = document.getElementById('game-canvas');
   var ctx = canvas.getContext('2d');
@@ -55,11 +52,12 @@ $(document).ready(function() {
   var level = 1;
   var halfWidthBySnakeSize;
   var halfheightBySnakeSize;
+  var recenterSnakeXY;
+  var continuousBorder;
 
   // Initial set up canvas width & height
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight - $('header').outerHeight();
-
 
   //  This function essentially sets up arrays for grid use
   // It will clear &/or create arrays for the food to randomly select a location
@@ -74,6 +72,11 @@ $(document).ready(function() {
     }
   }
   foodLocationChoices();
+
+  recenterSnakeXY = function() {
+    snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
+    snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
+  };
 
   // Get half of the array and make sure its a whole number
   halfWidthBySnakeSize = Math.floor(widthBySnakeSize.length / 2);
@@ -217,6 +220,8 @@ $(document).ready(function() {
     snakeSize = Number(snakeSize);
     gameInterval = $('#speed-selector').find(':selected').val();
     gameInterval = Number(gameInterval);
+    continuousBorder = $('#continuous-border-selector').find(':selected').val();
+    console.log(continuousBorder);
     player1Name = player1Input.val();
     player2Name = player2Input.val();
     updateScoreBoard();
@@ -228,8 +233,7 @@ $(document).ready(function() {
     food.h = snakeSize;
     //It will empty the widthBySnakeSize and heightBySnakeSize and rewrite it with new snakeSize options
     foodLocationChoices();
-    snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
-    snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
+    recenterSnakeXY();
     food.x = widthBySnakeSize[Math.floor(Math.random() * widthBySnakeSize.length)];
     food.y = heightBySnakeSize[Math.floor(Math.random() * heightBySnakeSize.length)];
     clearAllIntervals();
@@ -246,8 +250,7 @@ $(document).ready(function() {
       $('#main-modal').modal('close');
       popUpScore.css('display', 'none');
     }, 500);
-    snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
-    snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
+    recenterSnakeXY();
     clearAllIntervals();
     newFood();
     startDrawing();
@@ -288,7 +291,6 @@ $(document).ready(function() {
 
   // if any conditional ends the game it calls this function
   var gameOver = function() {
-    //cl(finalScoreText)
     popUpScore.css('display', 'flex');
     $('#main-modal').modal('open');
     finalScoreText.html(score);
@@ -405,7 +407,8 @@ $(document).ready(function() {
     // Clear the frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
+    // Check to see if they have completed a level
+    // If they haven't then keep drawing the snake and food
     if (score === 5 && level === 1) {
       levelComplete();
     } else if (score === 10 && level === 2){
@@ -430,7 +433,7 @@ $(document).ready(function() {
       verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);
     // }
 
-    if (score >= 10 && level >= 3) {
+    // if (score >= 10 && level >= 3) {
 
       // UpperLeft -- create item and make sure no food goes there
       drawingVerticalWall(widthBySnakeSize[5], heightBySnakeSize[5],  heightBySnakeSize[9], 4);
@@ -454,9 +457,9 @@ $(document).ready(function() {
       verticalWallCheck(food.x, food.y, widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[heightBySnakeSize.length - 8],  heightBySnakeSize[heightBySnakeSize.length - 5], 4);
       drawingHorizontalWall(widthBySnakeSize[widthBySnakeSize.length - 8], widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[heightBySnakeSize.length - 5], 4);
       horizontalWallCheck(food.x, food.y, widthBySnakeSize[widthBySnakeSize.length - 8], widthBySnakeSize[widthBySnakeSize.length - 5], heightBySnakeSize[heightBySnakeSize.length - 5], 4);
-    }
-
-    if (score >= 20 && level >= 4) {
+    // }
+    //
+    // if (score >= 20 && level >= 4) {
       if (canvas.width > 860) {
         // MiddleLeft
         drawingHorizontalWall(widthBySnakeSize[8], widthBySnakeSize[15], heightBySnakeSize[halfHeightBySnakeSize], 7);
@@ -473,6 +476,56 @@ $(document).ready(function() {
         drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize + 11], widthBySnakeSize[halfWidthBySnakeSize + 15], heightBySnakeSize[halfHeightBySnakeSize], 4);
         horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 11], widthBySnakeSize[halfWidthBySnakeSize + 15], heightBySnakeSize[halfHeightBySnakeSize], 4);
       }
+    // }
+
+    if (canvas.width < 860 && canvas.width > 460) {
+      // LowerMiddleLeft
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize - 5], heightBySnakeSize[heightBySnakeSize.length - 6],  heightBySnakeSize[heightBySnakeSize.length - 5], 2);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 5], heightBySnakeSize[heightBySnakeSize.length - 6],  heightBySnakeSize[heightBySnakeSize.length - 5], 2);
+      drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize - 10], widthBySnakeSize[halfWidthBySnakeSize - 5], heightBySnakeSize[heightBySnakeSize.length - 5], 5);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 10], widthBySnakeSize[halfWidthBySnakeSize - 5], heightBySnakeSize[heightBySnakeSize.length - 5], 5);
+
+      // LowerMiddleRight
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize + 5], heightBySnakeSize[heightBySnakeSize.length - 6],  heightBySnakeSize[heightBySnakeSize.length - 5], 2);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 5], heightBySnakeSize[heightBySnakeSize.length - 6],  heightBySnakeSize[heightBySnakeSize.length - 5], 2);
+      drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize + 5], widthBySnakeSize[halfWidthBySnakeSize + 9], heightBySnakeSize[heightBySnakeSize.length - 5], 5);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 5], widthBySnakeSize[halfWidthBySnakeSize + 9], heightBySnakeSize[heightBySnakeSize.length - 5], 5);
+
+      // UpperMiddleLeft
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize - 5], heightBySnakeSize[5],  heightBySnakeSize[6], 2);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 5], heightBySnakeSize[5],  heightBySnakeSize[6], 2);
+      drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize - 10], widthBySnakeSize[halfWidthBySnakeSize - 6], heightBySnakeSize[5], 5);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 10], widthBySnakeSize[halfWidthBySnakeSize - 6], heightBySnakeSize[5], 5);
+
+      // UpperMiddleRight
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize + 5], heightBySnakeSize[5],  heightBySnakeSize[6], 2);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 5], heightBySnakeSize[5],  heightBySnakeSize[6], 2);
+      drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize + 5], widthBySnakeSize[halfWidthBySnakeSize + 9], heightBySnakeSize[5], 5);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 5], widthBySnakeSize[halfWidthBySnakeSize + 9], heightBySnakeSize[5], 5);
+    } else {
+      // LowerMiddleLeft
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize - 15], heightBySnakeSize[heightBySnakeSize.length - 6],  heightBySnakeSize[heightBySnakeSize.length - 5], 2);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 15], heightBySnakeSize[heightBySnakeSize.length - 6],  heightBySnakeSize[heightBySnakeSize.length - 5], 2);
+      drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize - 20], widthBySnakeSize[halfWidthBySnakeSize - 15], heightBySnakeSize[heightBySnakeSize.length - 5], 5);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 20], widthBySnakeSize[halfWidthBySnakeSize - 15], heightBySnakeSize[heightBySnakeSize.length - 5], 5);
+
+      // LowerMiddleRight
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize + 14], heightBySnakeSize[heightBySnakeSize.length - 6],  heightBySnakeSize[heightBySnakeSize.length - 5], 2);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 14], heightBySnakeSize[heightBySnakeSize.length - 6],  heightBySnakeSize[heightBySnakeSize.length - 5], 2);
+      drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize + 15], widthBySnakeSize[halfWidthBySnakeSize + 19], heightBySnakeSize[heightBySnakeSize.length - 5], 5);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 15], widthBySnakeSize[halfWidthBySnakeSize + 19], heightBySnakeSize[heightBySnakeSize.length - 5], 5);
+
+      // UpperMiddleLeft
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize - 15], heightBySnakeSize[5],  heightBySnakeSize[6], 2);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 15], heightBySnakeSize[5],  heightBySnakeSize[6], 2);
+      drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize - 20], widthBySnakeSize[halfWidthBySnakeSize - 16], heightBySnakeSize[5], 5);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize - 20], widthBySnakeSize[halfWidthBySnakeSize - 16], heightBySnakeSize[5], 5);
+
+      // UpperMiddleRight
+      drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize + 15], heightBySnakeSize[5],  heightBySnakeSize[6], 2);
+      verticalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 15], heightBySnakeSize[5],  heightBySnakeSize[6], 2);
+      drawingHorizontalWall(widthBySnakeSize[halfWidthBySnakeSize + 15], widthBySnakeSize[halfWidthBySnakeSize + 19], heightBySnakeSize[5], 5);
+      horizontalWallCheck(food.x, food.y, widthBySnakeSize[halfWidthBySnakeSize + 15], widthBySnakeSize[halfWidthBySnakeSize + 19], heightBySnakeSize[5], 5);
     }
 
     // Pass the x, y values of the head to an array for the tail to use
@@ -519,16 +572,28 @@ $(document).ready(function() {
 
       };
     };
-
-    // If the Game hits the border, game over.
-    if (snake.x + snake.w > canvas.width) {
-      gameOver();
-    } else if (snake.x < 0) {
-      gameOver();
-    } else if (snake.y + snake.h > canvas.height) {
-      gameOver();
-    } else if (snake.y < 0) {
-      gameOver();
+    console.log(continuousBorder);
+    if (continuousBorder === 'no') {
+      // If the Game hits the border, game over.
+      if (snake.x + snake.w > canvas.width) {
+        gameOver();
+      } else if (snake.x < 0) {
+        gameOver();
+      } else if (snake.y + snake.h > canvas.height) {
+        gameOver();
+      } else if (snake.y < 0) {
+        gameOver();
+      }
+    } else {
+      if (snake.x + snake.w > canvas.width) {
+        snake.x = 0;
+      } else if (snake.x < 0) {
+        snake.x = widthBySnakeSize[widthBySnakeSize.length - 1];
+      } else if (snake.y + snake.h > canvas.height) {
+        snake.y = 0;
+      } else if (snake.y < 0) {
+        snake.y = heightBySnakeSize[heightBySnakeSize.length - 1];
+      }
     }
 
   };
@@ -540,7 +605,6 @@ $(document).ready(function() {
     clearInterval(rightInterval);
     clearInterval(frameLoopInterval);
   };
-
 
   var startDrawing = function() {
     frameLoopInterval = setInterval(animationLoop, gameInterval);
@@ -556,8 +620,7 @@ $(document).ready(function() {
       popUpScore.css('display', 'none');
       $('#game-options').modal('open');
     }, 500);
-    snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
-    snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
+    recenterSnakeXY();
     clearAllIntervals();
   };
 
@@ -566,6 +629,8 @@ $(document).ready(function() {
     nextPlayerButton.on('click', nextPlayer);
     nextLevelButton.on('click', nextLevel);
 
+    // Materialize Calls
+    $('select').material_select();
     $('#game-options').modal({
       dismissible: false, // Modal can be dismissed by clicking outside of the modal
       opacity: .5, // Opacity of modal background

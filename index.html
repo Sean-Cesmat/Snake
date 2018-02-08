@@ -14,7 +14,7 @@
     <div id="main-modal" class="modal">
       <div id="pop-up-paused" class="modal-content">
         <h1>Paused</h1>
-        <h5>Press SpaceBar to Continute.</h5>
+        <h5>Press SpaceBar to Continue.</h5>
       </div>
       <div id="pop-up-level" class="modal-content">
         <h1>Level Complete</h1>
@@ -55,7 +55,7 @@
               <label for="player2">Player 2 Name: <input type="text" id="player2" value="Player 2" /></label>
             </div>
 
-            <div class="input-field col s6 center-align">
+            <div class="input-field col s4 center-align">
               <select  id="size-selector">
                 <option value="10">Small</option>
                 <option value="15" selected>Normal</option>
@@ -63,13 +63,20 @@
               </select>
               <label>Size of snake:</label>
             </div>
-            <div class="input-field col s6 center-align">
+            <div class="input-field col s4 center-align">
               <select id="speed-selector">
                 <option value="200">Slow</option>
                 <option value="100" selected>Normal</option>
                 <option value="75">Fast</option>
               </select>
               <label>Speed:</label>
+            </div>
+            <div class="input-field col s4 center-align">
+              <select id="continuous-border-selector">
+                <option value="no" selected>No</option>
+                <option value="yes">yes</option>
+              </select>
+              <label>Continuous Border:</label>
             </div>
 
           </div>
