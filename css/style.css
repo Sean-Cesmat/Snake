@@ -4,8 +4,32 @@ html, body {
   height: 100%;
   font-size: 14px;
   overflow: hidden;
+  font-family: 'exo', sans-serif;
+}
+#logo{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#logo img {
+  max-width: 100%;
+  padding: 23px 0px;
 }
 
+.final-scores {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.top-score {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.top-score h5 {
+  padding: 16px 0px;
+}
 canvas {
   background: url('../img/grass-dark.jpg') repeat;
   margin-bottom: 0px;
@@ -61,8 +85,9 @@ header .row {
   padding: 24px 24px 0px 24px;
 }
 a.modal-action.modal-close.waves-green.btn-flat {
-    background: #6feaa0;
+    background: #22b573;
     font-weight: bold;
+    color: #fff;
 }
 .modal.bottom-sheet {
     height: 100%;
@@ -72,6 +97,15 @@ a.modal-action.modal-close.waves-green.btn-flat {
 #next-player, #reset, #winner {
   display: none;
 }
+
+.btn, .btn-large {
+  background-color: #9b6feb !important;
+}
+
+.btn:hover, .btn-large:hover {
+  background-color: #ad85f5 !important;
+}
+
 
 #pop-up-score, #pop-up-paused, #pop-up-level {
   display: none;
@@ -84,4 +118,16 @@ a.modal-action.modal-close.waves-green.btn-flat {
 #pop-up-level p {
   margin-top: -6px;
   font-size: 1.3rem;
+}
+
+@media (max-width: 600px) {
+  .top-score {
+    flex-direction: column;
+  }
+  .top-score h5 {
+    padding: 0px;
+  }
+  #p1-top-score, #p2-top-score {
+    margin-top: 0px;
+  }
 }

@@ -1,6 +1,6 @@
 
 
-  addLevels = function(score, level, widthBySnakeSize, heightBySnakeSize, foodX, foodY, halfWidthBySnakeSize, halfHeightBySnakeSize, canvasW, canvasH) {
+  addLevels = function(score, level, widthBySnakeSize, heightBySnakeSize, foodX, foodY, halfWidthBySnakeSize, halfHeightBySnakeSize, canvasW, canvasH, drawingVerticalWall, verticalWallCheck, drawingHorizontalWall, horizontalWallCheck) {
     if (score >= 5 && level >= 2) {
       // LeftCenter Wall
       drawingVerticalWall(widthBySnakeSize[halfWidthBySnakeSize - 6], heightBySnakeSize[halfHeightBySnakeSize - 3], heightBySnakeSize[halfHeightBySnakeSize + 3], 6);

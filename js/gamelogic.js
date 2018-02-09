@@ -9,7 +9,6 @@ $(document).ready(function() {
   var popUpScore = $('#pop-up-score');
   var popUpNewGame = $('#pop-up-new-game');
   var popUpLevel = $('#pop-up-level');
-  var finalScoreText = $('#final-score-text');
   var highScoreText = $('#high-score-text');
   var resetButton = $('#reset');
   var nextPlayerButton = $('#next-player');
@@ -54,6 +53,16 @@ $(document).ready(function() {
   var halfheightBySnakeSize;
   var recenterSnakeXY;
   var continuousBorder;
+  var p1FlipScore;
+  var p2FlipScore;
+
+  // Add the scoreboard to the top bar
+  p1FlipScore = new FlipClock($('#p1-top-score'), 00, {
+    clockFace: 'Counter'
+  });
+  p2FlipScore = new FlipClock($('#p2-top-score'), 00, {
+    clockFace: 'Counter'
+  });
 
   // Initial set up canvas width & height
   canvas.width = window.innerWidth;
@@ -207,10 +216,6 @@ $(document).ready(function() {
     }
   };
 
-  var updateScoreBoard = function() {
-    player1ScoreBoard.html(player1Name + ': ' + player1Score);
-    player2ScoreBoard.html(player2Name + ': ' + player2Score);
-  };
 
   // This function takes the options and updates the game with the new options
   var startGame = function() {
@@ -224,7 +229,8 @@ $(document).ready(function() {
     console.log(continuousBorder);
     player1Name = player1Input.val();
     player2Name = player2Input.val();
-    updateScoreBoard();
+    $('.top-score .p1-top-name').html(player1Name);
+    $('.top-score .p2-top-name').html(player2Name);
     colorSnakeTail = [];
     colorSnakeTail.push(food.color);
     snake.w = snakeSize;
@@ -271,7 +277,6 @@ $(document).ready(function() {
     console.log('x ' + food.x + '  y ' + food.y);
   };
 
-
   var foodGotAte = function(x1, y1, x2, y2) {
     var xDistance = (x2 + snakeSize) - (x1 + snakeSize);
     var yDistance = (y2 + snakeSize) - (y1 + snakeSize);
@@ -280,12 +285,12 @@ $(document).ready(function() {
       score += 1;
       if (currentPlayer === 1) {
         player1Score += 1;
+        p1FlipScore.increment();
       } else if (currentPlayer === 2) {
         player2Score += 1;
+        p2FlipScore.increment();
       }
-      updateScoreBoard();
       newFood();
-
     }
   };
 
@@ -293,15 +298,30 @@ $(document).ready(function() {
   var gameOver = function() {
     popUpScore.css('display', 'flex');
     $('#main-modal').modal('open');
-    finalScoreText.html(score);
     if (currentPlayer === 1) {
-      finalScoreText.html(player1Name + ': ' + player1Score);
+      $('.final-scores').removeClass('s6');
+      $('.final-scores').addClass('s12');
+      $('.final-scores:nth-child(2)').hide();
+      $('.final-scores #name1').html(player1Name);
+      var p1FlipFinalScore = new FlipClock($('#p1-final-score'), player1Score, {
+        clockFace: 'Counter'
+      });
       $('#reset').hide();
       $('#winner').hide();
       $('#next-player').show();
       currentPlayer = 2;
     } else if (currentPlayer === 2) {
-      finalScoreText.html(player1Name + ': ' + player1Score + '<br />' + player2Name + ': ' + player2Score);
+      $('.final-scores').removeClass('s12');
+      $('.final-scores').addClass('s6');
+      $('.final-scores:nth-child(2)').show();
+      $('#name1').html(player1Name);
+      $('#name2').html(player2Name);
+      var p1FlipFinalScore = new FlipClock($('#p1-final-score'), player1Score, {
+        clockFace: 'Counter'
+      });
+      var p2FlipFinalScore = new FlipClock($('#p2-final-score'), player2Score, {
+        clockFace: 'Counter'
+      });
       if (player1Score > player2Score) {
         $('#winner').html(player1Name + ' Wins!');
       } else if (player1Score < player2Score) {
@@ -326,8 +346,7 @@ $(document).ready(function() {
     $('#main-modal').modal('open');
     popUpLevel.css('display', 'flex');
     $('#pop-up-level h1').html('Level ' + level + ' complete');
-    snake.x = widthBySnakeSize[Math.floor(widthBySnakeSize.length / 2)];
-    snake.y = heightBySnakeSize[Math.floor(heightBySnakeSize.length / 2)];
+    recenterSnakeXY();
     clearAllIntervals();
     level++;
     upForNextLevel = function(event) {
@@ -617,7 +636,8 @@ $(document).ready(function() {
     clearVars();
     player1Score = 0;
     player2Score = 0;
-    updateScoreBoard();
+    p1FlipScore.reset();
+    p2FlipScore.reset();
     setTimeout(function() {
       $('#main-modal').modal('close');
       popUpScore.css('display', 'none');
