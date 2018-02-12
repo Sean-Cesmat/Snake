@@ -610,11 +610,11 @@ $(document).ready(function() {
       if (snake.x + snake.w > canvas.width) {
         snake.x = 0;
       } else if (snake.x < 0) {
-        snake.x = widthBySnakeSize[widthBySnakeSize.length - 1];
+        snake.x = widthBySnakeSize[widthBySnakeSize.length];
       } else if (snake.y + snake.h > canvas.height) {
         snake.y = 0;
       } else if (snake.y < 0) {
-        snake.y = heightBySnakeSize[heightBySnakeSize.length - 1];
+        snake.y = heightBySnakeSize[heightBySnakeSize.length];
       }
     }
 
