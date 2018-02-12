@@ -615,6 +615,7 @@ $(document).ready(function() {
         snake.y = 0;
       } else if (snake.y < 0) {
         snake.y = heightBySnakeSize[heightBySnakeSize.length];
+        
       }
     }
 
